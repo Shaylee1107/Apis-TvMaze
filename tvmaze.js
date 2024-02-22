@@ -45,7 +45,7 @@ function populateShows(shows) {
               src=${show.image}
               alt="Bletchly Circle San Francisco"
               class="w-25 me-3">
-           <div class="media-body">
+           <div id=${show.id} class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
              <button class="btn btn-outline-light btn-sm Show-getEpisodes">
@@ -72,6 +72,15 @@ async function searchForShowAndDisplay() {
 
   // $episodesArea.hide();
   populateShows(shows);
+
+  const episodeBtns = document.querySelectorAll('.Show-getEpisodes');
+  for(let btn of episodeBtns){
+    btn.addEventListener('click', function(e){
+      console.log(e.target.parentNode.id);
+      const parentId = e.target.parentNode.id;
+      getEpisodesOfShow(parentId);
+    })
+  }
 }
 
 $searchForm.on("submit", async function (evt) {
@@ -84,7 +93,15 @@ $searchForm.on("submit", async function (evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+
+
+async function getEpisodesOfShow(id) { 
+  const res = await axios.get(`https://api.tvmaze.com/shows/${id}/episodes`);
+  console.log(res);
+  for(let episode of res.data){
+    console.log(episode.name);
+  }
+}
 
 /** Write a clear docstring for this function... */
 
