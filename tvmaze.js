@@ -16,16 +16,18 @@ async function getShowsByTerm(term) {
 console.log('getshows()', term);
   const res = await axios.get(`https://api.tvmaze.com/search/shows?q=${term}`);
 console.log('this is res', res);
+  const shows = [];
 
-  return [
-    {
-      id: res.data[0].show.id,
-      name: res.data[0].show.name,
-      summary:
-        `<p><b>${res.data[0].show.name}</b>${res.data[0].show.summary}</p>`,
-      image: res.data[0].show.image.original
-    }
-  ];
+for (let idx of res.data){
+  shows.push({
+    id: idx.show.id,
+    name: idx.show.name,
+    summary: `<p><b>${idx.show.name}</b>${idx.show.summary}</p>`,
+    image: idx.show.image ? idx.show.image.medium : 'https://tinyurl.com/tv-missing'
+  });
+}
+
+return shows; 
 }
 
 
@@ -33,6 +35,7 @@ console.log('this is res', res);
 
 function populateShows(shows) {
   $showsList.empty();
+  console.log('this is shows', shows);
 
   for (let show of shows) {
     const $show = $(
