@@ -55,7 +55,7 @@ function populateShows(shows) {
          </div>
        </div>
       `);
-
+      
     $showsList.append($show);
   }
 }
@@ -76,12 +76,34 @@ async function searchForShowAndDisplay() {
   const episodeBtns = document.querySelectorAll('.Show-getEpisodes');
   for(let btn of episodeBtns){
     btn.addEventListener('click', function(e){
-      console.log(e.target.parentNode.id);
-      const parentId = e.target.parentNode.id;
-      getEpisodesOfShow(parentId);
+      if(e.target.nextElementSibling){
+        console.log('HAS SIBLING');
+        const remove = e.target.nextElementSibling;
+        remove.remove();
+      } else {
+        console.log(e.target.parentNode.id);
+
+        const parentId = e.target.parentNode.id;
+        const parent = e.target.parentNode; 
+      
+        const div = document.createElement('div');
+        const h3 = document.createElement('h3');
+        const ul = document.createElement('ul');
+  
+        parent.append(div);
+        div.append(h3);
+        div.append(ul);
+        div.setAttribute('id', 'episodeArea');
+        div.setAttribute('name', 'visible');
+        h3.innerText = "Episodes";
+        ul.setAttribute('id', 'episodesList');
+  
+        getEpisodesOfShow(parentId, ul);
+      }
     })
   }
 }
+
 
 $searchForm.on("submit", async function (evt) {
   evt.preventDefault();
@@ -95,14 +117,21 @@ $searchForm.on("submit", async function (evt) {
 
 
 
-async function getEpisodesOfShow(id) { 
+async function getEpisodesOfShow(id, target) { 
   const res = await axios.get(`https://api.tvmaze.com/shows/${id}/episodes`);
   console.log(res);
+ 
   for(let episode of res.data){
-    console.log(episode.name);
+    console.log({id: episode.id, name: episode.name, season: episode.season, number: episode.number});
+    const li = document.createElement('li');
+    li.innerText = episode.name
+    target.append(li);
   }
 }
 
 /** Write a clear docstring for this function... */
 
-// function populateEpisodes(episodes) { }
+function populateEpisodes(episodes) { 
+
+
+}
