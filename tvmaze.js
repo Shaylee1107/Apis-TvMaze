@@ -5,13 +5,6 @@ const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
 
 
-/** Given a search term, search for tv shows that match that query.
- *
- *  Returns (promise) array of show objects: [show, show, ...].
- *    Each show object should contain exactly: {id, name, summary, image}
- *    (if no image URL given by API, put in a default image URL)
- */
-
 async function getShowsByTerm(term) {
 console.log('getshows()', term);
   const res = await axios.get(`https://api.tvmaze.com/search/shows?q=${term}`);
@@ -30,8 +23,6 @@ for (let idx of res.data){
 return shows; 
 }
 
-
-/** Given list of shows, create markup for each and to DOM */
 
 function populateShows(shows) {
   $showsList.empty();
@@ -61,21 +52,23 @@ function populateShows(shows) {
 }
 
 
-/** Handle search form submission: get shows from API and display.
- *    Hide episodes area (that only gets shown if they ask for episodes)
- */
-
 async function searchForShowAndDisplay() {
   const term = $("#searchForm-term").val();
   console.log('this is term', term);
   const shows = await getShowsByTerm(term);
 
-  // $episodesArea.hide();
   populateShows(shows);
+
+  // the code below listens for a click on any episode button. 
 
   const episodeBtns = document.querySelectorAll('.Show-getEpisodes');
   for(let btn of episodeBtns){
     btn.addEventListener('click', function(e){
+      // I added an IF statment to test if the button has already been clicked by checking if the button itself has a sibling (since when the button is clicked it appends the list of episodes right underneath the button as a sibling.) If the button has a sibling, it is removed, allowing the user to show and hide the episodes. 
+
+      //if the button does NOT have a sibling, then it creates the elements that belong in the Episodes Area (div, h3, and ul). These elements are then appended into the parent element of the button, and given name and id attributes. 
+      
+      //NEXT we place the values of the parentId (the id of the show asossiated with the button) and the ul asossiated with the show episodes info into the getEpisodesofShow
       if(e.target.nextElementSibling){
         console.log('HAS SIBLING');
         const remove = e.target.nextElementSibling;
@@ -110,28 +103,20 @@ $searchForm.on("submit", async function (evt) {
   await searchForShowAndDisplay();
 });
 
-
-/** Given a show ID, get from API and return (promise) array of episodes:
- *      { id, name, season, number }
- */
-
-
-
+//The getEpisodesOfShow accepts the id of the show, and the event.target ul. We then get the data of all the episodes id, name, season, and number
 async function getEpisodesOfShow(id, target) { 
   const res = await axios.get(`https://api.tvmaze.com/shows/${id}/episodes`);
   console.log(res);
  
   for(let episode of res.data){
-    console.log({id: episode.id, name: episode.name, season: episode.season, number: episode.number});
-    const li = document.createElement('li');
-    li.innerText = episode.name
-    target.append(li);
+    const episodeInfo = {id: episode.id, name: episode.name, season: episode.season, number: episode.number};
+    populateEpisodes(episodeInfo, target)
   }
 }
 
-/** Write a clear docstring for this function... */
-
-function populateEpisodes(episodes) { 
-
-
+//The populateEpisodes appends the lis with the epiode information from getEpisodesOfShow() to the event.target ul 
+function populateEpisodes(episode, target) { 
+  const li = document.createElement('li');
+    li.innerText = `${episode.name} (season ${episode.season}, number ${episode.number})`;
+    target.append(li);
 }
